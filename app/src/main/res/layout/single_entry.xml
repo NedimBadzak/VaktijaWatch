@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="15dp"
+    android:layout_marginBottom="20dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/imeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Zora"
+        android:textAlignment="center"
+        android:textSize="36sp" />
+
+    <TextView
+        android:id="@+id/vrijemeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="00:00"
+        android:textAlignment="center"
+        android:textSize="22sp" />
+
+    <TextView
+        android:id="@+id/relacioniTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="za 10 sati"
+        android:textAlignment="center"
+        android:textSize="18sp" />
+</LinearLayout>
