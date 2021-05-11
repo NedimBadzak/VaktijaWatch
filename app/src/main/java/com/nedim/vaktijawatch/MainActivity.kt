@@ -2,18 +2,13 @@ package com.nedim.vaktijawatch
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.opengl.Visibility
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.support.wearable.activity.WearableActivity
-import android.support.wearable.view.BoxInsetLayout
 import android.util.Log
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.ViewGroup
 import android.widget.ProgressBar
-import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -26,9 +21,12 @@ import java.util.*
 
 
 class MainActivity : WearableActivity() {
-    private var grad : Int = 0
-    private lateinit var progressBar : ProgressBar
-//    private lateinit var mDetector : GestureDetectorCompat
+    private var grad: Int = 0
+    private lateinit var progressBar: ProgressBar
+    lateinit var db: Database
+    var lista: List<String?> = listOf()
+
+    //    private lateinit var mDetector : GestureDetectorCompat
     //    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +34,7 @@ class MainActivity : WearableActivity() {
 
         // Enables Always-on
         setAmbientEnabled()
+        db = Database(applicationContext)
 //        mDetector = GestureDetectorCompat(this, MyGestureListener())
         var vakatRecycler: RecyclerView = findViewById(R.id.vakatRecycler)
         progressBar = findViewById(R.id.progressBar)
@@ -52,76 +51,73 @@ class MainActivity : WearableActivity() {
             "Jacija"
         )
         var content: String? = null
-        val sharedPreferences: SharedPreferences = this.getSharedPreferences("postavke",
-            Context.MODE_PRIVATE)
-        grad = if(sharedPreferences.getInt("grad", 0) == 0) {
+        val sharedPreferences: SharedPreferences = this.getSharedPreferences(
+            "postavke",
+            Context.MODE_PRIVATE
+        )
+        grad = if (sharedPreferences.getInt("grad", 0) == 0) {
             77
         } else {
             sharedPreferences.getInt("grad", 0)
         }
 
-        val thread = Thread {
-            val localTime: Date = Calendar.getInstance().time
-            progressBar.visibility = View.VISIBLE
-            content = dajContentStranice(
-                SimpleDateFormat("dd").format(localTime).toString().toInt(),
-                SimpleDateFormat("MM").format(localTime).toString().toInt(),
-                SimpleDateFormat("YYYY").format(localTime).toString().toInt()
-            )
-            runOnUiThread {
-                if (content != null) {
-                    var jsonObject: JSONObject = JSONObject(content)
-                    var jsonArray: JSONArray = jsonObject.getJSONArray("vakat")
-                    for (i in 0 until jsonArray.length()) {
-                        listaVakat.add(
-                            Vakat(
-                                imenaVaktova[i],
-                                SimpleDateFormat("HH:mm").parse(jsonArray[i] as String)
-                            )
-                        )
-                    }
-                    vakatRecycler.adapter = VakatListAdapter(
-                        listaVakat
-                    )
-                }
-                progressBar.visibility = View.GONE
-            }
-        }
-    thread.start()
-
-    val pullToRefresh: SwipeRefreshLayout = findViewById(R.id.pullToRefresh)
-        pullToRefresh.setOnRefreshListener {
-            Thread {
-                val localTime: Date = Calendar.getInstance().time
-                content = dajContentStranice(
-                    SimpleDateFormat("dd").format(localTime).toString().toInt(),
-                    SimpleDateFormat("MM").format(localTime).toString().toInt(),
-                    SimpleDateFormat("YYYY").format(localTime).toString().toInt()
+        val localTime: Date = Calendar.getInstance().time
+        progressBar.visibility = View.VISIBLE
+        lista = Utils.getCorrectList(
+            db.getPrayerTimesSec(
+                SimpleDateFormat("M").format(localTime).toString().toInt(),
+                SimpleDateFormat("d").format(localTime).toString().toInt(),
+                grad+1
+            ), SimpleDateFormat("YYYY").format(localTime).toString().toInt(),
+            SimpleDateFormat("M").format(localTime).toString().toInt(),
+            SimpleDateFormat("d").format(localTime).toString().toInt()
+        )
+        Log.d("TAGIC", db.getLocationName(grad+1))
+        Log.v("TAGIC", "Ide bazom")
+        for (i in lista.indices) {
+            listaVakat.add(
+                Vakat(
+                    imenaVaktova[i],
+                    SimpleDateFormat("HH:mm").parse(lista[i])
                 )
-                runOnUiThread {
-                    if (content != null) {
-                        var jsonObject: JSONObject = JSONObject(content)
-                        var jsonArray: JSONArray = jsonObject.getJSONArray("vakat")
-                        var novaLista: MutableList<Vakat> = mutableListOf()
-                        for (i in 0 until jsonArray.length()) {
-                            novaLista.add(
-                                Vakat(
-                                    imenaVaktova[i],
-                                    SimpleDateFormat("HH:mm").parse(jsonArray[i] as String)
-                                )
-                            )
-                        }
-                        listaVakat = novaLista
-                        vakatRecycler.adapter = VakatListAdapter(
-                            listaVakat
-                        )
-                    }
-                }
-                pullToRefresh.isRefreshing = false
-            }.start()
+            )
+        }
+        vakatRecycler.adapter = VakatListAdapter(
+            listaVakat
+        )
+        progressBar.visibility = View.GONE
+
+
+        val pullToRefresh: SwipeRefreshLayout = findViewById(R.id.pullToRefresh)
+        pullToRefresh.setOnRefreshListener {
+            val localTime: Date = Calendar.getInstance().time
+            lista = Utils.getCorrectList(
+                db.getPrayerTimesSec(
+                    SimpleDateFormat("M").format(localTime).toString().toInt(),
+                    SimpleDateFormat("d").format(localTime).toString().toInt(),
+                    grad+1
+                ), SimpleDateFormat("YYYY").format(localTime).toString().toInt(),
+                SimpleDateFormat("M").format(localTime).toString().toInt(),
+                SimpleDateFormat("d").format(localTime).toString().toInt()
+            )
+            Log.d("TAGIC", db.getLocationName(grad+1))
+            Log.v("TAGIC", "Ide bazom")
+            for (i in lista.indices) {
+                listaVakat.add(
+                    Vakat(
+                        imenaVaktova[i],
+                        SimpleDateFormat("HH:mm").parse(lista[i])
+                    )
+                )
+            }
+            vakatRecycler.adapter = VakatListAdapter(
+                listaVakat
+            )
+            pullToRefresh.isRefreshing = false
         }
     }
 
+/*
     private fun dajContentStranice(dan: Int, mjesec: Int, godina: Int): String? {
         var content: String? = null
         var connection: URLConnection? = null
@@ -139,6 +135,15 @@ class MainActivity : WearableActivity() {
 //        var siteContent : String = URL("http://www.google.com").readText()
 //        return siteContent
     }
+*/
+
+/*
+    private fun isConnected(): Boolean {
+        val cm = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        return activeNetwork?.isConnected == true
+    }
+*/
 
 
 
