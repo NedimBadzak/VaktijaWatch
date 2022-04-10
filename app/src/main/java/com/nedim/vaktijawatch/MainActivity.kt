@@ -85,6 +85,7 @@ class MainActivity : WearableActivity() {
         vakatRecycler.adapter = VakatListAdapter(
             listaVakat
         )
+        vakatRecycler.requestFocus()
         progressBar.visibility = View.GONE
 
 

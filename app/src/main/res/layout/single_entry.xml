@@ -29,4 +29,11 @@
         android:text="za 10 sati"
         android:textAlignment="center"
         android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Promijeni lokaciju"
+        android:visibility="gone" />
 </LinearLayout>

@@ -1,12 +1,15 @@
 package com.nedim.vaktijawatch
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
@@ -14,7 +17,6 @@ import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.math.abs
 
 class VakatListAdapter(
     var lista: List<Vakat>
@@ -33,6 +35,10 @@ class VakatListAdapter(
         var localTime : Calendar = Calendar.getInstance()
         val simpleDateFormat : SimpleDateFormat = SimpleDateFormat("HH:mm")
         simpleDateFormat.timeZone = java.util.TimeZone.getDefault()
+        holder.promijeniLokacijuButton.visibility = View.GONE;
+        if (position === lista.size - 1) {
+            holder.promijeniLokacijuButton.setVisibility(View.VISIBLE)
+        }
         holder.imeVakta.text = lista[position].ime
         holder.vrijemeVakta.text = simpleDateFormat.format(lista[position].vrijeme).toString()
         Log.v("TAGIC", simpleDateFormat.format(localTime.time))
@@ -63,14 +69,23 @@ class VakatListAdapter(
                 break
             }
         }
+
+        holder.promijeniLokacijuButton.setOnClickListener {
+            Log.d("TAGIC", "promijeni lokaciju")
+            val intent : Intent = Intent(holder.itemView.context, ListaGradova::class.java)
+            intent.putExtra("promjena", true)
+            holder.itemView.context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = lista.size
+
 
     inner class VakatListHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imeVakta : TextView = itemView.findViewById(R.id.imeTextView)
         val vrijemeVakta : TextView = itemView.findViewById(R.id.vrijemeTextView)
         val relacioniTextView : TextView = itemView.findViewById(R.id.relacioniTextView)
+        val promijeniLokacijuButton : Button = itemView.findViewById(R.id.button)
     }
 
     fun getSuffixForNumber(number: Int, maleGender: Boolean): String? {

@@ -5,11 +5,18 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.wearable.activity.WearableActivity
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.GridLayout
 import android.widget.ListView
+import androidx.core.view.InputDeviceCompat
+import androidx.core.view.MotionEventCompat
+import androidx.core.view.ViewConfigurationCompat
+import kotlin.math.roundToInt
 
 class ListaGradova : WearableActivity() {
 
@@ -21,18 +28,22 @@ class ListaGradova : WearableActivity() {
         setAmbientEnabled()
         val sharedPreferences: SharedPreferences = this.getSharedPreferences("postavke",
             Context.MODE_PRIVATE)
-        if(sharedPreferences.getInt("grad",0) != 0) {
+        val commingIntentDeets = intent.extras
+        Log.d("TAGIC", "DOLAZECI: ${commingIntentDeets?.size().toString()}")
+        if(sharedPreferences.getInt("grad",0) != 0 && commingIntentDeets == null){
             val intent : Intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
         val gradoviLista : MutableList<String> = popuniGradovima()
         var gradovi : ListView = findViewById(R.id.gradoviListView)
+
         gradovi.adapter = ArrayAdapter(
             baseContext,
             android.R.layout.simple_list_item_1,
             gradoviLista
         )
+        gradovi.requestFocus()
 
         gradovi.setOnItemClickListener { parent, view, position, id ->
 
@@ -43,7 +54,10 @@ class ListaGradova : WearableActivity() {
             startActivity(Intent(applicationContext, MainActivity::class.java))
             finish()
         }
+
+
     }
+
 
     private fun popuniGradovima(): MutableList<String> {
         return mutableListOf(
