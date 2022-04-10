@@ -102,6 +102,7 @@ class MainActivity : WearableActivity() {
             )
             Log.d("TAGIC", db.getLocationName(grad+1))
             Log.v("TAGIC", "Ide bazom")
+            listaVakat.clear();
             for (i in lista.indices) {
                 listaVakat.add(
                     Vakat(
