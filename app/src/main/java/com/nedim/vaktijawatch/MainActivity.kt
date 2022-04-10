@@ -119,6 +119,7 @@ class MainActivity : WearableActivity() {
         }
     }
 
+
 /*
     private fun dajContentStranice(dan: Int, mjesec: Int, godina: Int): String? {
         var content: String? = null
